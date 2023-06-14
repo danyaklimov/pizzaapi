@@ -1,9 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+import os
 
-engine = create_engine("postgresql://postgres:password@localhost/pizzadb",
-                       echo=True)
+DB_URL = os.environ['DB_URL']
+
+engine = create_engine(DB_URL, echo=True)
 
 Base = declarative_base()
 
 Session = sessionmaker()
+
