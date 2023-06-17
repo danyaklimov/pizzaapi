@@ -33,7 +33,8 @@ async def place_an_order(order: OrderModel, Authorize: AuthJWT = Depends()):
     user = session.query(User).filter(User.username == current_user).first()
     new_order = Order(
         pizza_size=order.pizza_size,
-        quantity=order.quantity
+        quantity=order.quantity,
+        flavour=order.flavour
     )
     new_order.user = user
 
@@ -42,6 +43,7 @@ async def place_an_order(order: OrderModel, Authorize: AuthJWT = Depends()):
 
     response = {
         "pizza_size": new_order.pizza_size,
+        "flavour": new_order.flavour,
         "quantity": new_order.quantity,
         "id": new_order.id,
         "user": new_order.user
