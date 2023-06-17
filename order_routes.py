@@ -80,3 +80,16 @@ async def get_order_by_id(order_id: int, Authorize: AuthJWT = Depends()):
         return jsonable_encoder(order)
 
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not a superuser")
+
+@order_router.get('/user/orders')
+async def get_current_user_orders(Authorize: AuthJWT = Depends()):
+    try:
+        Authorize.jwt_required()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    current_user = Authorize.get_jwt_subject()
+    user = session.query(User).filter(User.username == current_user).first()
+    orders = session.query(Order).filter(Order.user_id == user.id).all()
+
+    return jsonable_encoder(orders)
