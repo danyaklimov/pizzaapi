@@ -34,7 +34,8 @@ async def place_an_order(order: OrderModel, Authorize: AuthJWT = Depends()):
     new_order = Order(
         pizza_size=order.pizza_size,
         quantity=order.quantity,
-        flavour=order.flavour
+        flavour=order.flavour,
+        order_status=order.order_status
     )
     new_order.user = user
 
@@ -95,3 +96,16 @@ async def get_current_user_orders(Authorize: AuthJWT = Depends()):
     orders = session.query(Order).filter(Order.user_id == user.id).all()
 
     return jsonable_encoder(orders)
+
+@order_router.get('/user/order/{order_id}')
+async def get_current_user_specific_order(order_id: int, Authorize: AuthJWT = Depends()):
+    try:
+        Authorize.jwt_required()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    current_user = Authorize.get_jwt_subject()
+    user = session.query(User).filter(User.username == current_user).first()
+    order = session.query(Order).filter(Order.id == order_id, Order.user_id == user.id).first()
+
+    return jsonable_encoder(order)
