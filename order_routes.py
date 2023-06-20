@@ -4,7 +4,7 @@ from fastapi_jwt_auth import AuthJWT
 
 from database import engine, Session
 from models import User, Order
-from schemas import OrderModel
+from schemas import OrderModel, OrderStatusModel
 
 session = Session(bind=engine)
 
@@ -127,3 +127,30 @@ async def update_order(order_id: int, order: OrderModel, Authorize: AuthJWT = De
     result = session.query(Order).filter(Order.id == order_id).first()
 
     return jsonable_encoder(result)
+
+@order_router.patch('/order/status/{order_id}')
+async def update_order_status(order_id: int, order: OrderStatusModel, Authorize: AuthJWT = Depends()):
+    try:
+        Authorize.jwt_required()
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+    username = Authorize.get_jwt_subject()
+    current_user = session.query(User).filter(User.username == username).first()
+    if not current_user.is_staff:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not a superuser")
+
+    order_to_update = session.query(Order).filter(Order.id == order_id).first()
+    order_to_update.order_status = order.order_status
+
+    session.commit()
+
+    result = session.query(Order).filter(Order.id == order_id).first()
+    response = {
+        "id": result.id,
+        "order_status": result.order_status,
+        "quantity": result.quantity,
+        "flavour": result.flavour,
+        "user_id": result.user_id
+    }
+    return jsonable_encoder(response)
