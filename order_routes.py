@@ -108,6 +108,14 @@ async def get_current_user_specific_order(order_id: int, Authorize: AuthJWT = De
     user = session.query(User).filter(User.username == current_user).first()
     order = session.query(Order).filter(Order.id == order_id, Order.user_id == user.id).first()
 
+    response = {
+        "id": order.id,
+        "order_status": order.order_status,
+        "quantity": order.quantity,
+        "flavour": order.flavour,
+        "user_id": order.user_id
+    }
+
     return jsonable_encoder(order)
 
 @order_router.put('/order/update/{order_id}')
@@ -125,8 +133,15 @@ async def update_order(order_id: int, order: OrderModel, Authorize: AuthJWT = De
     session.commit()
 
     result = session.query(Order).filter(Order.id == order_id).first()
+    response = {
+        "id": result.id,
+        "order_status": result.order_status,
+        "quantity": result.quantity,
+        "flavour": result.flavour,
+        "user_id": result.user_id
+    }
 
-    return jsonable_encoder(result)
+    return jsonable_encoder(response)
 
 @order_router.patch('/order/status/{order_id}')
 async def update_order_status(order_id: int, order: OrderStatusModel, Authorize: AuthJWT = Depends()):
