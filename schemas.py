@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 
 
 class SignUpModel(BaseModel):
@@ -23,8 +23,8 @@ class SignUpModel(BaseModel):
             }
         }
 
-class Settings(BaseModel):
-    authjwt_secret_key: str = "5e90819cb384adba98ae70d40ab338f72ade3846be0c774444f4138bedbc76df"
+class Settings(BaseModel):                          # Field(env_name='S_KEY')
+    authjwt_secret_key: SecretStr = "5e90819cb384adba98ae70d40ab338f72ade3846be0c774444f4138bedbc76df"
 
 class LoginModel(BaseModel):
     username: str
